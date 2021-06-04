@@ -11,8 +11,10 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.IotApp"
-        >
+        android:theme="@style/Theme.IotApp">
+        <activity
+            android:name=".SettingsActivity"
+            android:label="@string/title_activity_settings"></activity>
         <activity android:name=".RGBWheelActivity" />
         <activity android:name=".MainActivity">
             <intent-filter>

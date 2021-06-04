@@ -1,14 +1,13 @@
 package com.example.iotapp;
 
-import android.app.AlertDialog;
-import android.app.Dialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
+import androidx.preference.PreferenceManager;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -58,7 +57,7 @@ public class PairedDeviceList extends DialogFragment {
             Toast.makeText(mainActivity.getApplicationContext(), "No Paired Bluetooth Devices Found.", Toast.LENGTH_LONG).show();
         }
 
-        final ArrayAdapter<String> adapter = new ArrayAdapter<String>(mainActivity.getApplicationContext(), android.R.layout.simple_list_item_1, list);
+        final ArrayAdapter<String> adapter = new ArrayAdapter<>(mainActivity.getApplicationContext(), android.R.layout.simple_list_item_1, list);
 
         deviceList.setAdapter(adapter);
         deviceList.setOnItemClickListener(myListClickListener); //Method called when the device from the list is clicked
@@ -66,13 +65,22 @@ public class PairedDeviceList extends DialogFragment {
 
     }
 
-    private AdapterView.OnItemClickListener myListClickListener = new AdapterView.OnItemClickListener() {
+    private final AdapterView.OnItemClickListener myListClickListener = new AdapterView.OnItemClickListener() {
         public void onItemClick(AdapterView<?> av, View v, int arg2, long arg3) {
             // Get the device MAC address, the last 17 chars in the View
             String info = ((TextView) v).getText().toString();
             String address = info.substring(info.length() - 17);
 
-            mainActivity.EXTRA_ADDRESS = address;
+            MainActivity.EXTRA_ADDRESS = address;
+
+
+            try {
+                if (btSocket != null || mainActivity.isBtConnected)
+                    btSocket.close();
+                    mainActivity.isBtConnected = false;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
             try {
                 if (btSocket == null || !mainActivity.isBtConnected) {
@@ -83,11 +91,21 @@ public class PairedDeviceList extends DialogFragment {
                     btSocket.connect();//start connection
 
                     mainActivity.isBtConnected = true;
-                    Toast toast = Toast.makeText(mainActivity.getApplicationContext(), "Device connected", Toast.LENGTH_SHORT);
-                    toast.show();
+                    Toast.makeText(mainActivity.getApplicationContext(), "Device connected", Toast.LENGTH_SHORT).show();
                 }
             } catch (IOException e) {
                 mainActivity.isBtConnected = false;//if the try failed, you can check the exception here
+            }
+
+            try {
+//                btSocket.getOutputStream().write(String.format("Automatic: %b", is_automatic).getBytes());
+                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mainActivity);
+                boolean is_automatic = prefs.getBoolean("automatic", false);
+                btSocket.getOutputStream().write(String.format("Automatic: %d", is_automatic ? 1 : 0).getBytes());
+//                System.out.println("Automatic is "+ is_automatic);
+                Toast.makeText(mainActivity.getApplicationContext(), String.valueOf(is_automatic), Toast.LENGTH_SHORT).show();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
 
         }

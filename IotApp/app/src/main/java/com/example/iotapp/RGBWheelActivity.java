@@ -35,18 +35,12 @@ public class RGBWheelActivity extends AppCompatActivity {
         Button confirmColor = (Button) findViewById(R.id.confirm_btn);
         ColorPickerView picker = (ColorPickerView) findViewById(R.id.color_picker_view);
 
-        picker.addOnColorSelectedListener(new OnColorSelectedListener() {
-            @Override
-            public void onColorSelected(int selectedColor) {
-                r = Color.red(selectedColor);
-                g = Color.green(selectedColor);
-                b = Color.blue(selectedColor);
-//                Toast toast = Toast.makeText(getApplicationContext(), Integer.toHexString(selectedColor), Toast.LENGTH_SHORT);
-//                toast.show();
-                Toast toast = Toast.makeText(getApplicationContext(), String.format("%d %d %d", r,g,b), Toast.LENGTH_SHORT);
-                toast.show();
+        picker.addOnColorSelectedListener(selectedColor -> {
+            r = Color.red(selectedColor);
+            g = Color.green(selectedColor);
+            b = Color.blue(selectedColor);
+//                Toast.makeText(getApplicationContext(), String.format("%d %d %d", r,g,b), Toast.LENGTH_SHORT).show();
 
-            }
         });
 
         confirmColor.setOnClickListener(new View.OnClickListener() {
